@@ -1,3 +1,7 @@
+use indexmap::IndexMap;
+
+/// A **tree part** is a single character in the tree structure. It can be
+/// either an edge, a line, a corner, or a blank space.
 #[derive(PartialEq, Eq, Debug, Copy, Clone)]
 pub enum TreePart {
     /// Rightmost column, *not* the last in the directory.
@@ -20,9 +24,9 @@ impl TreePart {
         #[rustfmt::skip]
         return match self {
             Self::Edge    => "├──",
-            Self::Line    => "│  ",
+            Self::Line    => "│   ",
             Self::Corner  => "└──",
-            Self::Blank   => "   ",
+            Self::Blank   => "    ",
         };
     }
 }
@@ -87,6 +91,13 @@ impl TreeTrunk {
 }
 
 #[derive(Debug, Copy, Clone)]
+/// A structure representing the parameters of a tree.
+///
+/// # Fields
+///
+/// * `depth` - A `TreeDepth` that represents how many directories deep into the tree structure this is.
+/// Directories on top have depth 0.
+/// * `last` - A boolean flag that indicates whether this is the last entry in the directory.
 pub struct TreeParams {
     /// How many directories deep into the tree structure this is. Directories
     /// on top have depth 0.
@@ -97,24 +108,43 @@ pub struct TreeParams {
 }
 
 impl TreeParams {
+    /// Create a new set of tree parameters.
     pub fn new(depth: TreeDepth, last: bool) -> Self {
         Self { depth, last }
     }
 }
 
 #[derive(Debug, Copy, Clone)]
+/// A structure representing the depth of a node in a tree.
+///
+/// This structure is used to represent the depth of a node in a tree.
+/// The depth of a node is the number of edges from the node to the tree's root node.
+/// A root node will have a depth of 0.
+///
+/// # Fields
+///
+/// * `0` - A `usize` that represents the depth of the node in the tree.
 pub struct TreeDepth(pub usize);
-
 impl TreeDepth {
+    /// Create a new tree depth.
     pub fn root() -> Self {
         Self(0)
     }
-
+    /// Increase the depth by one.
     pub fn deeper(self) -> Self {
         Self(self.0 + 1)
     }
 }
 
+/// A structure representing an iterator with a current depth.
+///
+/// This structure is used to represent an iterator that keeps track of the current depth in a tree.
+/// It is generic over the type of the inner iterator `I`.
+///
+/// # Fields
+///
+/// * `current_depth` - A `TreeDepth` that represents the current depth in the tree.
+/// * `inner` - The inner iterator of type `I`.
 pub struct Iter<I> {
     current_depth: TreeDepth,
     inner: I,
@@ -132,5 +162,48 @@ where
         // TODO: use exact_size_is_empty API soon
         let params = TreeParams::new(self.current_depth, self.inner.len() == 0);
         Some((params, t))
+    }
+}
+
+/// A structure representing a node in a tree.
+///
+/// This structure is used to represent a node in a tree. Each node has a collection of children,
+/// which are also nodes.
+/// The `IndexMap` ensures that the children are ordered in the order they were inserted.
+///
+/// # Fields
+///
+/// * `children` - An `IndexMap` where the keys are `String` and the values are `TreeNode`.
+/// This represents the children of the node.
+/// * `is_leaf` - A boolean flag that indicates whether the node is a leaf node
+/// (i.e. it has no children).
+pub struct TreeNode {
+    pub children: IndexMap<String, TreeNode>,
+    pub is_leaf: bool,
+}
+
+impl TreeNode {
+    /// Creates a new `TreeNode`.
+    pub fn new() -> TreeNode {
+        TreeNode {
+            children: IndexMap::new(),
+            is_leaf: true,
+        }
+    }
+
+    pub fn add_path<I>(&mut self, parts: I)
+    where
+        I: IntoIterator,
+        I::Item: AsRef<str>,
+    {
+        let mut current = self;
+        for part in parts {
+            current.is_leaf = false;
+            let part_str = part.as_ref().to_string();
+            current = current
+                .children
+                .entry(part_str)
+                .or_insert_with(TreeNode::new);
+        }
     }
 }
