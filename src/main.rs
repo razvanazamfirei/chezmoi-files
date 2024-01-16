@@ -7,7 +7,7 @@ mod tree;
 
 use crate::color::ColorScheme;
 use crate::tree::{TreeDepth, TreeNode, TreeParams, TreeTrunk};
-use atty::Stream;
+use is_terminal::IsTerminal;
 use std::env;
 use std::io::{self, BufRead};
 
@@ -24,7 +24,7 @@ use std::io::{self, BufRead};
 /// ```
 fn main() {
     // Check if there is any input provided to the program
-    if atty::is(Stream::Stdin) {
+    if io::stdout().is_terminal() {
         println!("No input provided. Please pipe data into the program.");
         return;
     }

@@ -1,9 +1,9 @@
 [package]
 name = "chezmoi-files"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "Apache-2.0"
 
 [dependencies]
-atty = "0.2.14"
+is-terminal = "0.4.10"
 indexmap = "2.1.0"
