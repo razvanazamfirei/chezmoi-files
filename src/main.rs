@@ -23,7 +23,7 @@ use std::io::{self, BufRead, IsTerminal};
 /// ```
 fn main() {
     // Check if there is any input provided to the program
-    if !io::stdout().is_terminal() {
+    if io::stdin().is_terminal() {
         println!("No input provided. Please pipe data into the program.");
         return;
     }
