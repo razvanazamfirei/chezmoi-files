@@ -46,6 +46,7 @@ fn main() {
                 let trimmed_path = path.trim_end_matches('/');
                 if trimmed_path.is_empty()
                     || excluded_files
+                        .files
                         .iter()
                         .any(|excluded| trimmed_path.contains(excluded))
                 {
