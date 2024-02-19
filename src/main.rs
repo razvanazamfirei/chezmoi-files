@@ -1,6 +1,7 @@
 /// This module defines the `ColorScheme` struct, which is used to colorize the output.
 mod color;
 
+mod config;
 /// This module encapsulates the tree structure. Part of the code in this module is derived from
 /// the `eza` crate, which is licensed under the MIT License. See source.
 mod tree;
@@ -33,7 +34,8 @@ fn main() {
     let pwd = env::current_dir().expect("Failed to get current directory");
     let pwd_str = pwd.to_str().expect("Failed to convert PathBuf to string");
     let color_scheme = ColorScheme::new();
-
+    let config = config::Config::new();
+    let excluded_files = config.excluded_files;
     let mut root = TreeNode::new();
     root.is_leaf = false;
 
@@ -43,11 +45,11 @@ fn main() {
             Ok(path) => {
                 let trimmed_path = path.trim_end_matches('/');
                 if trimmed_path.is_empty()
-                    || trimmed_path.contains("DS_Store")
-                    || trimmed_path.contains("plugins/fish")
-                    || trimmed_path.contains("plugins/zsh")
+                    || excluded_files
+                        .iter()
+                        .any(|excluded| trimmed_path.contains(excluded))
                 {
-                    continue; // Skip empty lines and lines containing excluded substrings
+                    continue;
                 }
                 // Strip the prefix of the current directory from the line and trim leading slashes
                 let relative_path = trimmed_path.strip_prefix(pwd_str).unwrap_or(trimmed_path);
