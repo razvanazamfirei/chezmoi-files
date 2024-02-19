@@ -36,6 +36,7 @@ fn main() {
     let color_scheme = ColorScheme::new();
     let config = config::Config::new();
     let excluded_files = config.excluded_files;
+    let included_files = config.included_files;
     let mut root = TreeNode::new();
     root.is_leaf = false;
 
@@ -45,10 +46,14 @@ fn main() {
             Ok(path) => {
                 let trimmed_path = path.trim_end_matches('/');
                 if trimmed_path.is_empty()
-                    || excluded_files
+                    || (excluded_files
                         .files
                         .iter()
                         .any(|excluded| trimmed_path.contains(excluded))
+                        && !included_files
+                            .files
+                            .iter()
+                            .any(|included| trimmed_path.contains(included)))
                 {
                     continue;
                 }
