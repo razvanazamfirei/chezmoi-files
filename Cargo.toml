@@ -1,10 +1,31 @@
 [package]
 name = "chezmoi-files"
 version = "0.4.0"
-edition = "2021"
+edition = "2024"
 license = "Apache-2.0"
+rust-version = "1.90"
+description = "A command-line utility for generating colorized tree visualizations of file paths"
+repository = "https://github.com/razvanazamfirei/chezmoi-files"
+readme = "CLAUDE.md"
+keywords = ["tree", "visualization", "cli", "chezmoi", "filesystem"]
+categories = ["command-line-utilities", "visualization"]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
 
 [dependencies]
-indexmap = "2.2.3"
-toml = "0.8.10"
-serde = { version = "1.0.196", features = ["derive"] }
+indexmap = "2.11.4"
+toml = "0.9.8"
+serde = { version = "1.0.228", features = ["derive"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

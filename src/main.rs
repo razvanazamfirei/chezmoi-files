@@ -1,9 +1,11 @@
-/// This module defines the `ColorScheme` struct, which is used to colorize the output.
-mod color;
+//! # chezmoi-files
+//!
+//! A command-line utility that generates colorized tree visualizations of file paths.
+//! It reads file paths from stdin, filters them based on configurable rules, and outputs
+//! a hierarchical tree structure with syntax-highlighted file names.
 
+mod color;
 mod config;
-/// This module encapsulates the tree structure. Part of the code in this module is derived from
-/// the `eza` crate, which is licensed under the MIT License. See source.
 mod tree;
 
 use crate::color::ColorScheme;
@@ -11,23 +13,27 @@ use crate::tree::{TreeDepth, TreeNode, TreeParams, TreeTrunk};
 use std::env;
 use std::io::{self, BufRead, IsTerminal};
 
-#[deny(missing_docs)]
 /// The main function of the program.
 ///
 /// This function is the entry point of the program. It reads lines from the standard input and
-/// processes each line.
+/// processes each line to build and display a tree visualization.
+///
+/// # Panics
+///
+/// Panics if it cannot get the current working directory.
 ///
 /// # Example
 ///
-/// ```
+/// ```bash
 /// echo "path/to/file" | cargo run
 /// ```
 fn main() {
     // Check if there is any input provided to the program
     if io::stdin().is_terminal() {
-        println!("No input provided. Please pipe data into the program.");
+        eprintln!("No input provided. Please pipe data into the program.");
         return;
     }
+
     let stdin = io::stdin();
     let handle = stdin.lock();
 
@@ -35,8 +41,8 @@ fn main() {
     let pwd_str = pwd.to_str().expect("Failed to convert PathBuf to string");
     let color_scheme = ColorScheme::new();
     let config = config::Config::new();
-    let excluded_files = config.excluded_files;
-    let included_files = config.included_files;
+    let excluded_files = &config.excluded_files;
+    let included_files = &config.included_files;
     let mut root = TreeNode::new();
     root.is_leaf = false;
 
@@ -49,11 +55,11 @@ fn main() {
                     || (excluded_files
                         .files
                         .iter()
-                        .any(|excluded| trimmed_path.contains(excluded))
+                        .any(|excluded| trimmed_path.contains(excluded.as_str()))
                         && !included_files
                             .files
                             .iter()
-                            .any(|included| trimmed_path.contains(included)))
+                            .any(|included| trimmed_path.contains(included.as_str())))
                 {
                     continue;
                 }
@@ -62,7 +68,7 @@ fn main() {
                 relative_path.trim_start_matches('/').to_owned()
             }
             Err(error) => {
-                eprintln!("Error reading line: {}", error);
+                eprintln!("Error reading line: {error}");
                 continue;
             }
         };
@@ -77,19 +83,21 @@ fn main() {
 
 /// Prints a tree structure.
 ///
-/// This function is used to print a tree structure with the specified root node, trunk, depth,
-/// and color scheme.
+/// This function prints a tree structure with the specified root node, trunk, depth,
+/// and color scheme using a depth-first traversal.
 ///
 /// # Arguments
 ///
-/// * `node` - A reference to the TreeNode that is currently being processed.
-/// * `trunk` - A mutable reference to the TreeTrunk that is used to store the tree structure.
+/// * `node` - A reference to the `TreeNode` that is currently being processed.
+/// * `trunk` - A mutable reference to the `TreeTrunk` that is used to store the tree structure.
 /// * `depth` - The current depth of the tree.
-/// * `color_scheme` - A reference to the ColorScheme that is used to colorize the output.
+/// * `color_scheme` - A reference to the `ColorScheme` that is used to colorize the output.
 ///
 /// # Example
 ///
-/// ```
+/// ```no_run
+/// use chezmoi_files::{TreeNode, TreeTrunk, TreeDepth, ColorScheme};
+///
 /// let node = TreeNode::new();
 /// let mut trunk = TreeTrunk::default();
 /// let depth = TreeDepth::root().deeper();
@@ -102,8 +110,11 @@ fn print_tree(
     depth: TreeDepth,
     color_scheme: &ColorScheme,
 ) {
-    for (name, subtree) in &node.children {
-        let is_last = name == node.children.keys().last().unwrap();
+    let children = &node.children;
+    let last_key = children.keys().last();
+
+    for (name, subtree) in children {
+        let is_last = Some(name) == last_key;
         let params = TreeParams::new(depth, is_last);
         let parts = trunk.new_row(params);
 
