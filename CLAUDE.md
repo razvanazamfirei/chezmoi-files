@@ -108,7 +108,7 @@ The tree rendering uses a depth-first traversal with stateful trunk management:
 - **toml** (0.9.8): Configuration parsing
 - **serde** (1.0.228): Deserialization with derive feature
 
-## Modernization (v0.4.0)
+## Modernization (v0.5.0)
 
 This codebase uses the latest Rust standards:
 
