@@ -1,6 +1,6 @@
 [package]
 name = "chezmoi-files"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2024"
 license = "Apache-2.0"
 rust-version = "1.90"
@@ -21,6 +21,7 @@ nursery = "warn"
 cargo = "warn"
 
 [dependencies]
+clap = { version = "4.5.48", features = ["derive"] }
 indexmap = "2.11.4"
 toml = "0.9.8"
 serde = { version = "1.0.228", features = ["derive"] }

@@ -10,8 +10,19 @@ mod tree;
 
 use crate::color::ColorScheme;
 use crate::tree::{TreeDepth, TreeNode, TreeParams, TreeTrunk};
+use clap::Parser;
 use std::env;
 use std::io::{self, BufRead, IsTerminal};
+
+/// A command-line utility that generates colorized tree visualizations of file paths.
+///
+/// Reads file paths from stdin, filters them based on configurable rules, and outputs
+/// a hierarchical tree structure with syntax-highlighted file names.
+#[derive(Parser, Debug)]
+#[command(name = "chezmoi-files")]
+#[command(version)]
+#[command(about, long_about = None)]
+struct Args {}
 
 /// The main function of the program.
 ///
@@ -28,6 +39,9 @@ use std::io::{self, BufRead, IsTerminal};
 /// echo "path/to/file" | cargo run
 /// ```
 fn main() {
+    // Parse command-line arguments
+    let _args = Args::parse();
+
     // Check if there is any input provided to the program
     if io::stdin().is_terminal() {
         eprintln!("No input provided. Please pipe data into the program.");
