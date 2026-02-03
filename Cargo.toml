@@ -1,14 +1,37 @@
 [package]
 name = "chezmoi-files"
-version = "0.6.0"
+version = "0.7.0"
+authors = ["Razvan Zamfir <razvanazamfirei@gmail.com>"]
 edition = "2024"
 license = "Apache-2.0"
-rust-version = "1.90"
-description = "A command-line utility for generating colorized tree visualizations of file paths"
+rust-version = "1.92.0"
+description = "A command-line utility for generating colorized tree visualizations of file paths with glob pattern filtering and customizable colors"
+documentation = "https://docs.rs/chezmoi-files"
 repository = "https://github.com/razvanazamfirei/chezmoi-files"
-readme = "CLAUDE.md"
+homepage = "https://github.com/razvanazamfirei/chezmoi-files"
+readme = "README.md"
 keywords = ["tree", "visualization", "cli", "chezmoi", "filesystem"]
 categories = ["command-line-utilities", "visualization"]
+exclude = [
+    ".github/*",
+    "test.txt",
+    "lcov.info",
+    "target/*",
+    "*.profraw",
+    "*.profdata",
+]
+
+[[bin]]
+name = "chezmoi-files"
+path = "src/main.rs"
+
+[lib]
+name = "chezmoi_files"
+path = "src/lib.rs"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -21,10 +44,11 @@ nursery = "warn"
 cargo = "warn"
 
 [dependencies]
-clap = { version = "4.5.48", features = ["derive"] }
-indexmap = "2.11.4"
+clap = { version = "4.5.53", features = ["derive"] }
+indexmap = "2.12.1"
 toml = "0.9.8"
 serde = { version = "1.0.228", features = ["derive"] }
+glob = "0.3.3"
 
 [profile.release]
 lto = true

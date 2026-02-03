@@ -1,0 +1,129 @@
+use std::fs;
+use std::process::Command;
+use std::io::Write as IoWrite;
+
+#[test]
+fn test_malformed_config_falls_back_to_defaults() {
+    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let config_dir = temp_dir.join(".config").join("chezmoi");
+    fs::create_dir_all(&config_dir).unwrap();
+
+    let config_file = config_dir.join("chezmoi-files.toml");
+
+    // Create malformed TOML
+    fs::write(&config_file, "this is not valid [[[[ toml").unwrap();
+
+    let mut child = Command::new("cargo")
+        .args(["run", "--quiet", "--"])
+        .env("HOME", &temp_dir)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("Failed to spawn child process");
+
+    let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+    stdin
+        .write_all(b"DS_Store\nregular.txt\n")
+        .expect("Failed to write to stdin");
+    let _ = stdin;
+
+    let output = child.wait_with_output().expect("Failed to read stdout");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    // DS_Store should be excluded by default config
+    assert!(!stdout.contains("DS_Store"));
+    assert!(stdout.contains("regular.txt"));
+
+    // Cleanup
+    let _ = fs::remove_dir_all(&temp_dir);
+}
+
+#[test]
+fn test_config_with_only_colors_section() {
+    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let config_dir = temp_dir.join(".config").join("chezmoi");
+    fs::create_dir_all(&config_dir).unwrap();
+
+    let config_file = config_dir.join("chezmoi-files.toml");
+
+    // Config with only colors section
+    let config = r#"
+[colors]
+enabled = true
+folder = "cyan"
+"#;
+
+    fs::write(&config_file, config).unwrap();
+
+    let mut child = Command::new("cargo")
+        .args(["run", "--quiet", "--"])
+        .env("HOME", &temp_dir)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("Failed to spawn child process");
+
+    let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+    stdin
+        .write_all(b"test.txt\n")
+        .expect("Failed to write to stdin");
+    let _ = stdin;
+
+    let output = child.wait_with_output().expect("Failed to read stdout");
+
+    // Should not panic and should output something
+    assert!(output.status.success());
+
+    // Cleanup
+    let _ = fs::remove_dir_all(&temp_dir);
+}
+
+#[test]
+fn test_config_with_custom_extensions() {
+    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let config_dir = temp_dir.join(".config").join("chezmoi");
+    fs::create_dir_all(&config_dir).unwrap();
+
+    let config_file = config_dir.join("chezmoi-files.toml");
+
+    // Config with custom extension colors
+    let config = r#"
+[excluded-files]
+files = []
+
+[included-files]
+files = []
+
+[colors]
+enabled = true
+
+[colors.extensions]
+".test" = "red"
+".custom" = "green"
+"#;
+
+    fs::write(&config_file, config).unwrap();
+
+    let mut child = Command::new("cargo")
+        .args(["run", "--quiet", "--"])
+        .env("HOME", &temp_dir)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("Failed to spawn child process");
+
+    let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+    stdin
+        .write_all(b"file.test\nfile.custom\n")
+        .expect("Failed to write to stdin");
+    let _ = stdin;
+
+    let output = child.wait_with_output().expect("Failed to read stdout");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    assert!(stdout.contains("file.test"));
+    assert!(stdout.contains("file.custom"));
+
+    // Cleanup
+    let _ = fs::remove_dir_all(&temp_dir);
+}

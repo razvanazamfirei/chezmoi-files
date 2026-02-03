@@ -1,0 +1,41 @@
+# Example configuration for chezmoi-files
+# Copy this file to ~/.config/chezmoi/chezmoi-files.toml
+
+[excluded-files]
+# Patterns support glob-style wildcards: *, ?, [abc], [a-z]
+# Examples:
+#   "*.tmp"        - matches any file ending in .tmp
+#   "cache/*"      - matches any file in a cache directory
+#   "test_*.rs"    - matches test_foo.rs, test_bar.rs, etc.
+files = [
+    "DS_Store",
+    "fish_variables*",
+    ".rubocop.yml",
+    ".ruff_cache",
+    "yazi.toml-*",
+    ".zcompcache",
+    ".zcompdump",
+    ".zsh_history",
+    "plugins/fish",
+    "plugins/zsh",
+]
+
+[included-files]
+# Files matching these patterns will be included even if they match exclusions
+files = []
+
+[colors]
+# Set to false to disable colors entirely
+enabled = true
+
+# Customize colors for folders and files
+# Available colors: black, red, green, yellow, blue, magenta, cyan, white
+# You can also use custom ANSI codes like "\x1b[1;32m"
+# folder = "white"
+# default-file = "blue"
+
+# Customize colors for specific file extensions
+[colors.extensions]
+# ".rs" = "red"
+# ".py" = "green"
+# ".md" = "cyan"

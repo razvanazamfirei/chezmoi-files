@@ -3,6 +3,21 @@
 //! This module provides the core data structures and algorithms for building and
 //! rendering tree structures. Parts of this code are derived from the `eza` crate,
 //! which is licensed under the MIT License.
+//!
+//! # Examples
+//!
+//! ```
+//! use chezmoi_files::{TreeNode, TreeTrunk, TreeDepth, ColorScheme};
+//!
+//! // Create a tree structure
+//! let mut root = TreeNode::new();
+//! root.add_path(vec!["src", "main.rs"]);
+//! root.add_path(vec!["src", "lib.rs"]);
+//! root.add_path(vec!["tests", "test.rs"]);
+//!
+//! // The tree now contains the hierarchical structure
+//! assert_eq!(root.children.len(), 2); // src and tests
+//! ```
 
 use indexmap::IndexMap;
 
@@ -206,5 +221,160 @@ impl TreeNode {
 impl Default for TreeNode {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tree_part_ascii_art() {
+        assert_eq!(TreePart::Edge.ascii_art(), "├──");
+        assert_eq!(TreePart::Line.ascii_art(), "│   ");
+        assert_eq!(TreePart::Corner.ascii_art(), "└──");
+        assert_eq!(TreePart::Blank.ascii_art(), "    ");
+    }
+
+    #[test]
+    fn test_tree_depth_root() {
+        let depth = TreeDepth::root();
+        assert_eq!(depth.0, 0);
+    }
+
+    #[test]
+    fn test_tree_depth_deeper() {
+        let depth = TreeDepth::root().deeper();
+        assert_eq!(depth.0, 1);
+
+        let depth2 = depth.deeper();
+        assert_eq!(depth2.0, 2);
+    }
+
+    #[test]
+    fn test_tree_params_new() {
+        let params = TreeParams::new(TreeDepth::root(), true);
+        assert_eq!(params.depth.0, 0);
+        assert!(params.last);
+
+        let params2 = TreeParams::new(TreeDepth::root().deeper(), false);
+        assert_eq!(params2.depth.0, 1);
+        assert!(!params2.last);
+    }
+
+    #[test]
+    fn test_tree_node_new() {
+        let node = TreeNode::new();
+        assert!(node.is_leaf);
+        assert_eq!(node.children.len(), 0);
+    }
+
+    #[test]
+    fn test_tree_node_default() {
+        let node = TreeNode::default();
+        assert!(node.is_leaf);
+        assert_eq!(node.children.len(), 0);
+    }
+
+    #[test]
+    fn test_tree_node_add_path_simple() {
+        let mut root = TreeNode::new();
+        root.add_path(vec!["src", "main.rs"]);
+
+        assert!(!root.is_leaf);
+        assert_eq!(root.children.len(), 1);
+        assert!(root.children.contains_key("src"));
+
+        let src = &root.children["src"];
+        assert!(!src.is_leaf);
+        assert_eq!(src.children.len(), 1);
+        assert!(src.children.contains_key("main.rs"));
+
+        let main_rs = &src.children["main.rs"];
+        assert!(main_rs.is_leaf);
+    }
+
+    #[test]
+    fn test_tree_node_add_path_multiple() {
+        let mut root = TreeNode::new();
+        root.add_path(vec!["src", "main.rs"]);
+        root.add_path(vec!["src", "lib.rs"]);
+        root.add_path(vec!["tests", "test.rs"]);
+
+        assert_eq!(root.children.len(), 2);
+        assert!(root.children.contains_key("src"));
+        assert!(root.children.contains_key("tests"));
+
+        let src = &root.children["src"];
+        assert_eq!(src.children.len(), 2);
+        assert!(src.children.contains_key("main.rs"));
+        assert!(src.children.contains_key("lib.rs"));
+    }
+
+    #[test]
+    fn test_tree_trunk_new_row_first() {
+        let mut trunk = TreeTrunk::default();
+        let params = TreeParams::new(TreeDepth::root().deeper(), false);
+        let parts = trunk.new_row(params);
+
+        assert_eq!(parts.len(), 1);
+        assert_eq!(parts[0], TreePart::Edge);
+    }
+
+    #[test]
+    fn test_tree_trunk_new_row_last() {
+        let mut trunk = TreeTrunk::default();
+        let params = TreeParams::new(TreeDepth::root().deeper(), true);
+        let parts = trunk.new_row(params);
+
+        assert_eq!(parts.len(), 1);
+        assert_eq!(parts[0], TreePart::Corner);
+    }
+
+    #[test]
+    fn test_tree_trunk_new_row_multiple() {
+        let mut trunk = TreeTrunk::default();
+
+        // First row - not last
+        let params1 = TreeParams::new(TreeDepth::root().deeper(), false);
+        trunk.new_row(params1);
+
+        // Second row - last
+        let params2 = TreeParams::new(TreeDepth::root().deeper(), true);
+        let parts = trunk.new_row(params2);
+
+        assert_eq!(parts[0], TreePart::Corner);
+    }
+
+    #[test]
+    fn test_tree_trunk_new_row_deeper() {
+        let mut trunk = TreeTrunk::default();
+
+        // First level
+        let params1 = TreeParams::new(TreeDepth::root().deeper(), false);
+        trunk.new_row(params1);
+
+        // Second level
+        let params2 = TreeParams::new(TreeDepth::root().deeper().deeper(), false);
+        let parts = trunk.new_row(params2);
+
+        assert_eq!(parts.len(), 2);
+        assert_eq!(parts[0], TreePart::Line);
+        assert_eq!(parts[1], TreePart::Edge);
+    }
+
+    #[test]
+    fn test_tree_trunk_new_row_blank() {
+        let mut trunk = TreeTrunk::default();
+
+        // First row - last
+        let params1 = TreeParams::new(TreeDepth::root().deeper(), true);
+        trunk.new_row(params1);
+
+        // Second row at same level
+        let params2 = TreeParams::new(TreeDepth::root().deeper(), false);
+        let parts = trunk.new_row(params2);
+
+        assert_eq!(parts[0], TreePart::Edge);
     }
 }

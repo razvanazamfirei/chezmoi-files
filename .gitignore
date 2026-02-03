@@ -1,2 +1,24 @@
+# Rust build artifacts
 /target
+
+# Note: Cargo.lock should be committed for binaries but not libraries
+# This is a binary, so we commit Cargo.lock
+
+# IDE
 .idea/*
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+lcov.info
+*.profraw
+*.profdata
+
+# Testing artifacts
+*.tmp
