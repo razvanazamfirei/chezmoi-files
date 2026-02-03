@@ -21,8 +21,19 @@ fn test_malformed_config_falls_back_to_defaults() {
     // Ensure the config file is flushed to disk
     fs::File::open(&config_file).unwrap();
 
+    // Verify the file exists and is readable
+    assert!(config_file.exists(), "Config file should exist");
+    assert!(
+        fs::read_to_string(&config_file).is_ok(),
+        "Config file should be readable"
+    );
+
+    let temp_dir_str = temp_dir.to_str().expect("Failed to convert temp_dir to string");
+    eprintln!("HOME will be set to: {temp_dir_str}");
+    eprintln!("Config file path: {}", config_file.display());
+
     let mut child = Command::new(env!("CARGO_BIN_EXE_chezmoi-files"))
-        .env("HOME", &temp_dir)
+        .env("HOME", temp_dir_str)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
@@ -40,10 +51,11 @@ fn test_malformed_config_falls_back_to_defaults() {
     let stderr = String::from_utf8_lossy(&output.stderr);
 
     // Debug output
-    if !stderr.is_empty() {
-        eprintln!("stderr: {stderr}");
-    }
-    eprintln!("stdout: {stdout}");
+    eprintln!("=== STDERR ===");
+    eprintln!("{stderr}");
+    eprintln!("=== STDOUT ===");
+    eprintln!("{stdout}");
+    eprintln!("=============");
 
     // DS_Store should be excluded by default config
     assert!(
