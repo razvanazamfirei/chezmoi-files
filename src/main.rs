@@ -486,9 +486,8 @@ mod tests {
 
         sort_tree(&mut root, SortOrder::Type);
 
-        let keys: Vec<_> = root.children.keys().collect();
         // Should be sorted by extension
-        assert_eq!(keys.len(), 3);
+        assert_eq!(root.children.keys().count(), 3);
     }
 
     #[test]

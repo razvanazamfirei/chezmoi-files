@@ -1,6 +1,11 @@
+//! Integration tests for configuration file parsing.
+//!
+//! Tests various scenarios including malformed configs, missing files,
+//! and custom configuration values.
+
 use std::fs;
-use std::process::Command;
 use std::io::Write as IoWrite;
+use std::process::Command;
 
 #[test]
 fn test_malformed_config_falls_back_to_defaults() {

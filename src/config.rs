@@ -350,7 +350,8 @@ mod tests {
         // This should not panic even if config file doesn't exist
         let config = Config::new();
         // Config should be initialized (either from file or defaults)
-        assert!(config.colors.enabled || !config.colors.enabled); // Always true
+        // Verify that colors field exists and is accessible
+        let _ = config.colors.enabled;
     }
 
     #[test]

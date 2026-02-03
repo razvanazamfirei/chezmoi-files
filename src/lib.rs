@@ -40,7 +40,8 @@
 //!
 //! ## Features
 //!
-//! - **Glob Pattern Filtering**: Advanced pattern matching with wildcards (`*`, `?`, `[abc]`, `[a-z]`)
+//! - **Glob Pattern Filtering**: Advanced pattern matching with wildcards
+//!   (`*`, `?`, `[abc]`, `[a-z]`)
 //! - **Customizable Colors**: Configure colors for folders, files, and specific extensions
 //! - **Multiple Sorting Options**: Sort by name, type, or keep original order
 //! - **Statistics**: Display counts of files, directories, and excluded items

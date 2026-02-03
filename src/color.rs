@@ -68,7 +68,9 @@ impl ColorScheme {
         }
 
         // Source code
-        for ext in [".rs", ".py", ".go", ".jl", ".js", ".ts", ".c", ".cpp", ".java"] {
+        for ext in [
+            ".rs", ".py", ".go", ".jl", ".js", ".ts", ".c", ".cpp", ".java",
+        ] {
             extension_colors.insert(ext.to_string(), "\x1b[1;31m".to_string());
         }
 
@@ -304,7 +306,11 @@ mod tests {
 
         // Other
         assert!(!scheme.get_color_code_for_file("Info.plist").is_empty());
-        assert!(!scheme.get_color_code_for_file("settings.sublime").is_empty());
+        assert!(
+            !scheme
+                .get_color_code_for_file("settings.sublime")
+                .is_empty()
+        );
     }
 
     #[test]

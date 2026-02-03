@@ -1,3 +1,7 @@
+//! Integration tests for the `config` subcommand.
+//!
+//! Tests configuration initialization, display, and default config output.
+
 use std::fs;
 use std::process::Command;
 

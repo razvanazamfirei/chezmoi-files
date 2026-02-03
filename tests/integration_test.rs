@@ -1,3 +1,7 @@
+//! Integration tests for the main CLI functionality.
+//!
+//! Tests tree output, colorization, sorting, statistics, and filtering behavior.
+
 use std::io::Write;
 use std::process::{Command, Stdio};
 
