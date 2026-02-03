@@ -18,11 +18,14 @@ fn test_malformed_config_falls_back_to_defaults() {
     // Create malformed TOML
     fs::write(&config_file, "this is not valid [[[[ toml").unwrap();
 
-    let mut child = Command::new("cargo")
-        .args(["run", "--quiet", "--"])
+    // Ensure the config file is flushed to disk
+    fs::File::open(&config_file).unwrap();
+
+    let mut child = Command::new(env!("CARGO_BIN_EXE_chezmoi-files"))
         .env("HOME", &temp_dir)
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
         .spawn()
         .expect("Failed to spawn child process");
 
@@ -34,10 +37,23 @@ fn test_malformed_config_falls_back_to_defaults() {
 
     let output = child.wait_with_output().expect("Failed to read stdout");
     let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    // Debug output
+    if !stderr.is_empty() {
+        eprintln!("stderr: {stderr}");
+    }
+    eprintln!("stdout: {stdout}");
 
     // DS_Store should be excluded by default config
-    assert!(!stdout.contains("DS_Store"));
-    assert!(stdout.contains("regular.txt"));
+    assert!(
+        !stdout.contains("DS_Store"),
+        "DS_Store should be excluded but appeared in output:\n{stdout}"
+    );
+    assert!(
+        stdout.contains("regular.txt"),
+        "regular.txt should be included but missing from output:\n{stdout}"
+    );
 
     // Cleanup
     let _ = fs::remove_dir_all(&temp_dir);
