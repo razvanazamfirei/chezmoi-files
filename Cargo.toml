@@ -1,6 +1,6 @@
 [package]
 name = "chezmoi-files"
-version = "0.7.1"
+version = "0.8.0"
 authors = ["Razvan Azamfirei <razvan@azamfirei.com>"]
 edition = "2024"
 license = "Apache-2.0"
@@ -44,9 +44,9 @@ nursery = "warn"
 cargo = "warn"
 
 [dependencies]
-clap = { version = "4.5.53", features = ["derive"] }
-indexmap = "2.12.1"
-toml = "0.9.8"
+clap = { version = "4.5.59", features = ["derive"] }
+indexmap = "2.13.0"
+toml = "1.0.2+spec-1.1.0"
 serde = { version = "1.0.228", features = ["derive"] }
 glob = "0.3.3"
 
