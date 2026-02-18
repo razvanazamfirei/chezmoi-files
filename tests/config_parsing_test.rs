@@ -28,7 +28,9 @@ fn test_malformed_config_falls_back_to_defaults() {
         "Config file should be readable"
     );
 
-    let temp_dir_str = temp_dir.to_str().expect("Failed to convert temp_dir to string");
+    let temp_dir_str = temp_dir
+        .to_str()
+        .expect("Failed to convert temp_dir to string");
     eprintln!("HOME will be set to: {temp_dir_str}");
     eprintln!("Config file path: {}", config_file.display());
 
