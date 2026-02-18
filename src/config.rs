@@ -110,31 +110,11 @@ impl Config {
     pub fn new() -> Self {
         let config_path = Self::config_path();
 
-        eprintln!("DEBUG: Config path: {}", config_path.display());
-
         match fs::read_to_string(&config_path) {
             Ok(content) if !content.trim().is_empty() => {
-                eprintln!("DEBUG: Config file exists and has content");
-                // Try to parse the config file
-                match toml::from_str(&content) {
-                    Ok(config) => {
-                        eprintln!("DEBUG: Config parsed successfully");
-                        config
-                    }
-                    Err(e) => {
-                        eprintln!("DEBUG: Config parse failed: {e}, using defaults");
-                        Self::default()
-                    }
-                }
+                toml::from_str(&content).unwrap_or_default()
             }
-            Ok(_) => {
-                eprintln!("DEBUG: Config file is empty, using defaults");
-                Self::default()
-            }
-            Err(e) => {
-                eprintln!("DEBUG: Config file read failed: {e}, using defaults");
-                Self::default()
-            }
+            _ => Self::default(),
         }
     }
 
