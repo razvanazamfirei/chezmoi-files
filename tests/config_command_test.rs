@@ -5,9 +5,21 @@
 use std::fs;
 use std::process::Command;
 
+fn test_temp_dir() -> std::path::PathBuf {
+    let thread_name = std::thread::current()
+        .name()
+        .unwrap_or("unknown")
+        .replace("::", "_");
+    std::env::temp_dir().join(format!(
+        "chezmoi-test-{}-{}",
+        std::process::id(),
+        thread_name
+    ))
+}
+
 #[test]
 fn test_config_init_creates_file() {
-    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let temp_dir = test_temp_dir();
     fs::create_dir_all(&temp_dir).unwrap();
 
     let config_file = temp_dir.join("test-config.toml");
@@ -35,7 +47,7 @@ fn test_config_init_creates_file() {
 
 #[test]
 fn test_config_init_existing_file() {
-    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let temp_dir = test_temp_dir();
     let config_dir = temp_dir.join(".config").join("chezmoi");
     fs::create_dir_all(&config_dir).unwrap();
 
@@ -66,7 +78,7 @@ fn test_config_init_existing_file() {
 
 #[test]
 fn test_config_with_custom_colors() {
-    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let temp_dir = test_temp_dir();
     let config_dir = temp_dir.join(".config").join("chezmoi");
     fs::create_dir_all(&config_dir).unwrap();
 

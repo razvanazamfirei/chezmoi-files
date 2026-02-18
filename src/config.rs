@@ -111,9 +111,16 @@ impl Config {
         let config_path = Self::config_path();
 
         match fs::read_to_string(&config_path) {
-            Ok(content) if !content.trim().is_empty() => {
-                toml::from_str(&content).unwrap_or_default()
-            }
+            Ok(content) if !content.trim().is_empty() => match toml::from_str(&content) {
+                Ok(config) => config,
+                Err(e) => {
+                    eprintln!(
+                        "Warning: failed to parse config file {}: {e}",
+                        config_path.display()
+                    );
+                    Self::default()
+                }
+            },
             _ => Self::default(),
         }
     }

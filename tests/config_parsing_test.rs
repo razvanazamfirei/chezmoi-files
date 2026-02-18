@@ -7,9 +7,21 @@ use std::fs;
 use std::io::Write as IoWrite;
 use std::process::Command;
 
+fn test_temp_dir() -> std::path::PathBuf {
+    let thread_name = std::thread::current()
+        .name()
+        .unwrap_or("unknown")
+        .replace("::", "_");
+    std::env::temp_dir().join(format!(
+        "chezmoi-test-{}-{}",
+        std::process::id(),
+        thread_name
+    ))
+}
+
 #[test]
 fn test_malformed_config_falls_back_to_defaults() {
-    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let temp_dir = test_temp_dir();
     let config_dir = temp_dir.join(".config").join("chezmoi");
     fs::create_dir_all(&config_dir).unwrap();
 
@@ -75,7 +87,7 @@ fn test_malformed_config_falls_back_to_defaults() {
 
 #[test]
 fn test_config_with_only_colors_section() {
-    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let temp_dir = test_temp_dir();
     let config_dir = temp_dir.join(".config").join("chezmoi");
     fs::create_dir_all(&config_dir).unwrap();
 
@@ -115,7 +127,7 @@ folder = "cyan"
 
 #[test]
 fn test_config_with_custom_extensions() {
-    let temp_dir = std::env::temp_dir().join(format!("chezmoi-test-{}", std::process::id()));
+    let temp_dir = test_temp_dir();
     let config_dir = temp_dir.join(".config").join("chezmoi");
     fs::create_dir_all(&config_dir).unwrap();
 
